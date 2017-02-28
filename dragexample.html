@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+div {
+  border: solid 1px #000;
+  background: #eee;
+  text-align: center;
+  margin: 10px;
+  padding: 10px;
+  width: 540px;
+}
+
+.active {
+  background: lightcoral;
+}
+
+</style>
+<div>
+<canvas id="canvas" width=500 height=500>
+  
+</canvas>
+</div>
+<script src="//d3js.org/d3.v4.min.js"></script>
+<script>
+
+var mg = new Image();
+var data;
+var canvas = d3.select("canvas"),
+    context = canvas.node().getContext("2d"),
+    width = canvas.property("width"),
+    height = canvas.property("height"),
+    transform = d3.zoomIdentity;
+
+canvas
+  .call(d3.drag().subject(dragsubject).on("drag", dragged))
+  .call(d3.zoom().scaleExtent([1 / 2, 8]).on("zoom", zoomed))
+  .call(render);
+
+function zoomed() {
+  transform = d3.event.transform;
+  render();
+}
+
+function dragsubject() {
+  var i,
+      x = transform.invertX(d3.event.x),
+      y = transform.invertY(d3.event.y)
+  }
+
+function dragged() {
+  console.log(transform)
+  d3.event.subject[0] = transform.invertX(d3.event.x);
+  d3.event.subject[1] = transform.invertY(d3.event.y);
+  render();
+}
+
+function render() {
+  console.log(transform)
+  context.save();
+  context.clearRect(0, 0, width, height);
+  context.beginPath();
+  context.translate(transform.x, transform.y);
+  console.log(context.canvas)
+  context.scale(transform.k, transform.k);
+  context.drawImage(mg,0,0)
+  //context.fill();
+  context.restore();
+}
+
+function drawImage() {
+  mg.crossOrigin = "Anonymous"
+  mg.src = "http://d.tile.stamen.com/watercolor/8/77/94.jpg"
+  mg.onload = function() {
+    context.drawImage(mg, 0, 0)
+    var imd = context.getImageData(0,0,500,500);
+    console.log(imd)
+    data = imd.data;
+  }
+  render();  
+}
+
+drawImage();
+
+</script>
+</html>
